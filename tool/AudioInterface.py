@@ -34,3 +34,31 @@ class AudioInterface:
                 volume.SetMasterVolume(newVolume, None)
             else:
                 continue
+
+    # volume from 0 - 100
+    def setAllProcessVolumeExcept(self, processNames, newVolume):
+        newVolume = (100 - newVolume) / 100
+        newVolume = 1 - newVolume
+
+        sessions = []
+
+        for session in self.sessions:
+            if session.Process:
+                processName = session.Process.name().lower()
+
+                matched = False
+
+                for appName in processNames:
+                    p = re.compile(appName)
+
+                    if p.match(processName):
+                        matched = True
+                        break;
+
+                if not matched:
+                    sessions.append(session)
+
+
+        for session in sessions:
+            volume = session.SimpleAudioVolume
+            volume.SetMasterVolume(newVolume, None)

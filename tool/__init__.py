@@ -8,7 +8,12 @@ import os
 
 channels = [
     MixerChannel(0, "master", True),
-    MixerChannel(1, "other"),
+    MixerChannel(1, "other", False, [
+        "chrome",
+        "discord",
+        "spotify",
+        "system",
+    ]),
     MixerChannel(2, "chrome"),
     MixerChannel(3, "discord"),
     MixerChannel(4, "spotify"),

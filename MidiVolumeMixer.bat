@@ -1,2 +1,2 @@
-start pythonw src/main.py
+start pythonw main.py
 EXIT

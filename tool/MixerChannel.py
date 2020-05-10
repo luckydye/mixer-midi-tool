@@ -1,22 +1,39 @@
 from tool.AudioInterface import AudioInterface
+from pynput.keyboard import Key, Controller
 
 audio = AudioInterface()
+keyboard = Controller()
 
 class MixerChannel:
 
     title = "Channel"
     
-    def __init__(self, channel, application, master = False, exceptions = []):
+    def __init__(self, channelType, channel, mapping = None, exceptions = [], toggle = False):
+        self.type = channelType
         self.channel = channel
-        self.application = application
-        self.master = master
+        self.mapping = mapping
         self.exceptions = exceptions
+        self.toggle = toggle
 
-    def setVolume(self, volume):
-        if(len(self.exceptions) > 0):
-            audio.setAllProcessVolumeExcept(self.exceptions, volume)
-        else:
-            audio.setProcessVolume(self.application, volume)
+    # volume from 0 - 1
+    def setValue(self, value):
 
-        if(self.master):
-            audio.setMasterVolume(volume)
+        if(self.type == "level"):
+            value *= 100
+            if(len(self.exceptions) > 0):
+                audio.setAllProcessVolumeExcept(self.exceptions, value)
+            if(self.mapping):
+                if(self.mapping == "master"):
+                    audio.setMasterVolume(value)
+                else:
+                    audio.setProcessVolume(self.mapping, value)
+
+        if(self.type == "keyboard" and self.mapping):
+            if(not self.toggle and value > 0 or self.toggle):
+                if(self.mapping in Key.__dict__):
+                    key = Key[self.mapping]
+                    keyboard.press(key)
+                    keyboard.release(key)
+                else:
+                    keyboard.press(self.mapping)
+                    keyboard.release(self.mapping)

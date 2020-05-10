@@ -36,8 +36,8 @@ class MidiInputHandler(object):
 
         for channel in self.channels:
             if(channel.channel == cc):
-                volume = velocity / 127 * 100
-                channel.setVolume(volume)
+                value = velocity / 127
+                channel.setValue(value)
 
 
 class MidiInterface(threading.Thread):

@@ -1,45 +1,60 @@
 #!/usr/bin/env python3
 
-from tool.MixerChannel import MixerChannel
 from tool.MidiInterface import MidiInterface
 from pystray import Icon as icon, Menu as menu, MenuItem as item
 from PIL import Image
 import os 
 
-channels = [
-    MixerChannel(0, "master", True),
-    MixerChannel(1, "other", False, [
-        "chrome",
-        "discord",
-        "spotify",
-        "system",
-    ]),
-    MixerChannel(2, "chrome"),
-    MixerChannel(3, "discord"),
-    MixerChannel(4, "spotify"),
-]
-
-midiDeviceName = "nanoKONTROL2 4"
-
 def get_icon_image():
     dir_path = os.path.dirname(os.path.realpath(__file__))
     return Image.open(dir_path + "\icon.png")
 
+midi = None
 
-def tool():
+def tool(channels):
 
-    midi = MidiInterface(midiDeviceName, channels)
-    midi.start()
+    def startMidiThread(midiDeviceName):
+        global midi
 
-    def on_about_clicked():
-        print('nothing')
+        if(midi):
+            midi.stop()
+            
+        midi = MidiInterface(midiDeviceName, channels)
+        midi.start()
+        return midi
 
     def on_exit_clicked(icon, item):
         midi.stop()
         trayIcon.stop()
 
-    trayIcon = icon('test', get_icon_image(), menu=menu(
-        item('MidiVolumeMixer', on_about_clicked),
-        item('Exit', on_exit_clicked),
+    def set_state(v):
+        def inner(icon, item):
+            startMidiThread(v)
+        return inner
+
+    def get_state(v):
+        def inner(item):
+            return midi.midiDeviceName == v
+        return inner
+
+    def get_menu_items():
+        items = [
+            item('None', set_state("None"), checked=get_state("None"), radio=True)
+        ]
+
+        for port, name in midi.getMidiPorts():
+            items.append(
+                item(name, set_state(name), checked=get_state(name), radio=True)
+            )
+
+        return items
+
+
+    startMidiThread("nanoKONTROL2")
+
+    trayIcon = icon('MidiVolumeMixer', get_icon_image(), menu=menu(
+        item('MIDI Input', menu(get_menu_items)),
+        item('Exit', on_exit_clicked)
     ))
+
     trayIcon.run()

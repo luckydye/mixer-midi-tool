@@ -1,6 +1,7 @@
 import sys
 import time
 import threading
+import re
 from rtmidi.midiutil import open_midiinput
 from rtmidi import (API_LINUX_ALSA, API_MACOSX_CORE, API_RTMIDI_DUMMY,
                     API_UNIX_JACK, API_WINDOWS_MM, MidiIn, MidiOut,
@@ -38,19 +39,20 @@ class MidiInputHandler(object):
 
 class MidiInterface(threading.Thread):
 
-    def run(self):
-        self.kill = False
-        self.bindMidiChannels(self.midiDeviceName, self.channels)
-
     def __init__(self, midiDeviceName, channels):
         threading.Thread.__init__(self)
         self.midiDeviceName = midiDeviceName
         self.channels = channels
 
+    def run(self):
+        self.kill = False
+        if(self.midiDeviceName != "None"):
+            self.bindMidiChannels(self.midiDeviceName, self.channels)
+
     def stop(self):
         self.kill = True
-    
-    def getMidiPortByName(self, deviceName):
+
+    def getMidiPorts(self):
         available_apis = get_compiled_api()
 
         for api, api_name in sorted(apis.items()):
@@ -66,20 +68,25 @@ class MidiInterface(threading.Thread):
                     if not ports:
                         print("No MIDI %s ports found." % name)
                     else:
-                        for port, name in enumerate(ports):
-                            if(name == deviceName):
-                                print("Useing MIDI device: [%i] %s" % (port, name))
-                                return port - 1;
+                        return enumerate(ports)
 
                     print('')
                     del midi
+    
+    def getMidiPortByName(self, deviceName):
+        p = re.compile(deviceName)
 
+        for port, name in self.getMidiPorts():
+            if(p.match(name)):
+                return port;
 
     def bindMidiChannels(self, deviceName, channels):
         devicePort = self.getMidiPortByName(deviceName)
 
         try:
             midiin, port_name = open_midiinput(devicePort)
+            self.midiDeviceName = port_name
+            print("Useing MIDI device: " + port_name)
         except (EOFError, KeyboardInterrupt):
             sys.exit()
 
@@ -92,6 +99,6 @@ class MidiInterface(threading.Thread):
         except KeyboardInterrupt:
             print('')
         finally:
-            print("Exit")
-            midiin.close_port()
-            del midiin
+            print("Exit " + deviceName)
+            if(midiin):
+                midiin.close_port()

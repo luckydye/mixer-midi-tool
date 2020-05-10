@@ -3,7 +3,11 @@
 from tool.MidiInterface import MidiInterface
 from pystray import Icon as icon, Menu as menu, MenuItem as item
 from PIL import Image
+from tool.Config import Config
 import os 
+
+config = Config()
+config.load()
 
 def get_icon_image():
     dir_path = os.path.dirname(os.path.realpath(__file__))
@@ -30,6 +34,7 @@ def tool(channels):
     def set_state(v):
         def inner(icon, item):
             startMidiThread(v)
+            config.set("midi_input", v)
         return inner
 
     def get_state(v):
@@ -50,7 +55,8 @@ def tool(channels):
         return items
 
 
-    startMidiThread("nanoKONTROL2")
+    deviceName = config.get("midi_input")
+    startMidiThread(deviceName)
 
     trayIcon = icon('MidiVolumeMixer', get_icon_image(), menu=menu(
         item('MIDI Input', menu(get_menu_items)),

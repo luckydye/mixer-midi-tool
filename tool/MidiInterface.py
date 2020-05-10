@@ -2,10 +2,13 @@ import sys
 import time
 import threading
 import re
+import logging
 from rtmidi.midiutil import open_midiinput
 from rtmidi import (API_LINUX_ALSA, API_MACOSX_CORE, API_RTMIDI_DUMMY,
                     API_UNIX_JACK, API_WINDOWS_MM, MidiIn, MidiOut,
                     API_UNSPECIFIED, get_compiled_api)
+
+logging.basicConfig(filename='MidiVolumeMixer.log', level=logging.INFO, datefmt='%m/%d/%Y %I:%M:%S %p')
 
 apis = {
     API_MACOSX_CORE: "macOS (OS X) CoreMIDI",
@@ -62,15 +65,15 @@ class MidiInterface(threading.Thread):
                         midi = class_(api)
                         ports = midi.get_ports()
                     except StandardError as exc:
-                        print("Could not probe MIDI %s ports: %s" % (name, exc))
+                        logging.info("Could not probe MIDI %s ports: %s" % (name, exc))
                         continue
 
                     if not ports:
-                        print("No MIDI %s ports found." % name)
+                        logging.info("No MIDI %s ports found." % name)
                     else:
                         return enumerate(ports)
 
-                    print('')
+                    logging.info('')
                     del midi
     
     def getMidiPortByName(self, deviceName):
@@ -86,19 +89,19 @@ class MidiInterface(threading.Thread):
         try:
             midiin, port_name = open_midiinput(devicePort)
             self.midiDeviceName = port_name
-            print("Useing MIDI device: " + port_name)
+            logging.info("Useing MIDI device: " + port_name)
         except (EOFError, KeyboardInterrupt):
             sys.exit()
 
         midiin.set_callback(MidiInputHandler(port_name, channels))
 
-        print("Listening for MIDI input...")
+        logging.info("Listening for MIDI input...")
         try:
             while not self.kill:
                 time.sleep(1)
         except KeyboardInterrupt:
-            print('')
+            logging.info('')
         finally:
-            print("Exit " + deviceName)
+            logging.info("Exit " + deviceName)
             if(midiin):
                 midiin.close_port()

@@ -5,6 +5,7 @@ from pystray import Icon as icon, Menu as menu, MenuItem as item
 from PIL import Image
 from tool.Config import Config
 import os 
+import subprocess as sp
 
 config = Config()
 config.load()
@@ -30,6 +31,11 @@ def tool(channels):
     def on_exit_clicked(icon, item):
         midi.stop()
         trayIcon.stop()
+
+    def on_log_clicked(icon, item):
+        programName = "notepad.exe"
+        fileName = os.path.dirname(os.path.realpath(__file__)) + "\..\MidiVolumeMixer.log"
+        sp.Popen([programName, fileName])
 
     def set_state(v):
         def inner(icon, item):
@@ -59,6 +65,7 @@ def tool(channels):
     startMidiThread(deviceName)
 
     trayIcon = icon('MidiVolumeMixer', get_icon_image(), menu=menu(
+        item('Open log', on_log_clicked),
         item('MIDI Input', menu(get_menu_items)),
         item('Exit', on_exit_clicked)
     ))

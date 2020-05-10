@@ -1,5 +1,8 @@
 import json
 import os 
+import logging
+
+logging.basicConfig(filename='MidiVolumeMixer.log',level=logging.INFO)
 
 def get_path():
     return os.path.dirname(os.path.realpath(__file__))
@@ -17,7 +20,8 @@ class Config:
         json_file  = open(get_path() + "\config.json", "r") 
         json_string = json_file.read()
         self.datastore = json.loads(json_string)
-        print(self.datastore)
+        logging.info('config: ')
+        logging.info(self.datastore)
 
     def get(self, key):
         return self.datastore[key]

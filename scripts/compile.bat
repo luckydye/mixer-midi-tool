@@ -1,2 +1,1 @@
-pyinstaller.exe --icon=tayicon.ico --onefile  main.py
-PAUSE
+pyinstaller.exe --icon=trayicon.ico -n MidiVolumeMixer -F main.py

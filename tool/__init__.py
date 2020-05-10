@@ -34,7 +34,7 @@ def tool(channels):
 
     def on_log_clicked(icon, item):
         programName = "notepad.exe"
-        fileName = os.path.dirname(os.path.realpath(__file__)) + "\..\MidiVolumeMixer.log"
+        fileName = os.getcwd() + "\MidiVolumeMixer.log"
         sp.Popen([programName, fileName])
 
     def set_state(v):

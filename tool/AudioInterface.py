@@ -17,7 +17,6 @@ def getAudioSessions():
 class AudioInterface:
 
     def __init__(self):
-        self.master = getMasterEndpoint()
         self.sessions = getAudioSessions()
 
     # volume from 0 - 100
@@ -26,6 +25,7 @@ class AudioInterface:
         newVolume = math.pow(newVolume, 2.0)
         newVolume = newVolume * -100
 
+        self.master = getMasterEndpoint()
         self.master.SetMasterVolumeLevel(newVolume, None)
 
 

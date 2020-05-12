@@ -5,12 +5,20 @@ from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import re
 import math
 
-class AudioInterface:
-
+def getMasterEndpoint():
     devices = AudioUtilities.GetSpeakers()
     interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
     master = cast(interface, POINTER(IAudioEndpointVolume))
-    sessions = AudioUtilities.GetAllSessions()
+    return master
+
+def getAudioSessions():
+    return AudioUtilities.GetAllSessions()
+
+class AudioInterface:
+
+    def __init__(self):
+        self.master = getMasterEndpoint()
+        self.sessions = getAudioSessions()
 
     # volume from 0 - 100
     def setMasterVolume(self, newVolume):

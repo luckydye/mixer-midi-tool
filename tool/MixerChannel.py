@@ -18,6 +18,15 @@ class MixerChannel:
     # volume from 0 - 1
     def setValue(self, value):
 
+        if(self.type == "mute"):
+            if(self.mapping == "master"):
+                audio.setMasterMute(value);
+            else:
+                if(len(self.exceptions) > 0):
+                    audio.setMuteExcept(value, self.exceptions)
+                else:
+                    audio.setMute(value, self.mapping);
+
         if(self.type == "level"):
             value *= 100
             if(len(self.exceptions) > 0):

@@ -19,35 +19,22 @@ class AudioInterface:
     def __init__(self):
         self.sessions = getAudioSessions()
 
-    # volume from 0 - 100
-    def setMasterVolume(self, newVolume):
-        newVolume = (100 - newVolume) / 100
-        newVolume = math.pow(newVolume, 2.0)
-        newVolume = newVolume * -100
 
-        self.master = getMasterEndpoint()
-        self.master.SetMasterVolumeLevel(newVolume, None)
-
-
-    # volume from 0 - 100
-    def setProcessVolume(self, processName, newVolume):
-        newVolume = (100 - newVolume) / 100
-        newVolume = 1 - newVolume
+    def findProcesses(self, processName):
+        sessions = []
 
         for session in self.sessions:
             p = re.compile(processName)
 
             if session.Process and p.match(session.Process.name().lower()):
-                volume = session.SimpleAudioVolume
-                volume.SetMasterVolume(newVolume, None)
+                sessions.append(session);
             else:
                 continue
+            
+        return sessions
 
-    # volume from 0 - 100
-    def setAllProcessVolumeExcept(self, processNames, newVolume):
-        newVolume = (100 - newVolume) / 100
-        newVolume = 1 - newVolume
 
+    def findProcessesExcept(self, processNames):
         sessions = []
 
         for session in self.sessions:
@@ -65,8 +52,51 @@ class AudioInterface:
 
                 if not matched:
                     sessions.append(session)
+            
+        return sessions
 
 
-        for session in sessions:
-            volume = session.SimpleAudioVolume
-            volume.SetMasterVolume(newVolume, None)
+    def setSessionMute(self, value, session):
+        volume = session.SimpleAudioVolume
+        volume.SetMute(int(value), None)
+
+    def setMasterMute(self, value):
+        master = getMasterEndpoint()
+        master.SetMute(int(value), None)
+
+    def setSessionVolume(self, value, session):
+        volume = session.SimpleAudioVolume
+        volume.SetMasterVolume(value, None)
+
+
+    # 0 or 1
+    def setMute(self, value, processName):
+        for session in self.findProcesses(processName):
+            self.setSessionMute(value, session)
+
+    # 0 or 1
+    def setMuteExcept(self, value, processNames):
+        for session in self.findProcessesExcept(processNames):
+            self.setSessionMute(value, session)
+
+    # volume from 0 - 100
+    def setMasterVolume(self, newVolume):
+        newVolume = (100 - newVolume) / 100
+        newVolume = math.pow(newVolume, 2.0)
+        newVolume = newVolume * -100
+
+        master = getMasterEndpoint()
+        master.SetMasterVolumeLevel(newVolume, None)
+
+    # volume from 0 - 100
+    def setProcessVolume(self, processName, newVolume):
+        newVolume = 1 - ((100 - newVolume) / 100)
+        for session in self.findProcesses(processName):
+            self.setSessionVolume(newVolume, session)
+
+    # volume from 0 - 100
+    def setAllProcessVolumeExcept(self, processNames, newVolume):
+        newVolume = 1 - ((100 - newVolume) / 100)
+        for session in self.findProcessesExcept(processNames):
+            self.setSessionVolume(newVolume, session)
+

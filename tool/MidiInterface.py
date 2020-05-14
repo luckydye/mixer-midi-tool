@@ -30,14 +30,34 @@ class MidiInputHandler(object):
         self._wallclock += deltatime
         self.handleMessage(message)
 
+    def updateChannels(self, channels):
+        soloMode = False
+
+        for channel in channels:
+            if channel.solo > 0.0:
+                soloMode = True
+
+        if soloMode:
+            for channel in channels:
+                if channel.solo == 0.0 and channel.mapping != "master":
+                    channel.setMute(1)
+        else:
+            for channel in channels:
+                if channel.mute == 0.0:
+                    channel.setMute(0)
+
     def handleMessage(self, message):
         cc = message[1]
         velocity = message[2]
 
         for channel in self.channels:
-            if(channel.channel == cc):
-                value = velocity / 127
-                channel.setValue(value)
+            for channelCC in channel.midi:
+                if(channelCC == cc):
+                    value = velocity / 127
+                    channel.setValue(value, cc)
+                    break
+
+        self.updateChannels(self.channels)
 
 
 class MidiInterface(threading.Thread):

@@ -3,30 +3,53 @@ from tool.MixerChannel import MixerChannel
 
 if __name__ == "__main__":
 
+    other = [
+        "chrome",
+        "discord",
+        "spotify",
+        "system",
+    ]
+
     channels = [
-        MixerChannel("level", 0, mapping="master"),
-        MixerChannel("mute", 48, mapping="master"),
-        MixerChannel("level", 1, exceptions=[
-            "chrome",
-            "discord",
-            "spotify",
-            "system",
-        ]),
-        MixerChannel("mute", 49, exceptions=[
-            "chrome",
-            "discord",
-            "spotify",
-            "system",
-        ]),
-        MixerChannel("level", 2, mapping="chrome"),
-        MixerChannel("mute", 50, mapping="chrome"),
-        MixerChannel("level", 3, mapping="spotify"),
-        MixerChannel("mute", 51, mapping="spotify"),
-        MixerChannel("level", 7, mapping="discord"),
-        MixerChannel("mute", 55, mapping="discord"),
-        MixerChannel("keyboard", 41, mapping="media_play_pause"),
-        MixerChannel("keyboard", 43, mapping="media_previous"),
-        MixerChannel("keyboard", 44, mapping="media_next"),
+        MixerChannel(mapping="master", midi={
+            0: "level",
+            48: "mute",
+            32: "solo",
+        }),
+
+        MixerChannel(exceptions=other, midi={
+            1: "level",
+            49: "mute",
+            33: "solo",
+        }),
+
+        MixerChannel(mapping="chrome", midi={
+            2: "level",
+            50: "mute",
+            34: "solo",
+        }),
+
+        MixerChannel(mapping="spotify", midi={
+            3: "level",
+            51: "mute",
+            35: "solo",
+        }),
+
+        MixerChannel(mapping="discord", midi={
+            7: "level",
+            55: "mute",
+            39: "solo",
+        }),
+
+        MixerChannel(mapping="media_play_pause", midi={
+            41: "keyboard"
+        }),
+        MixerChannel(mapping="media_previous", midi={
+            43: "keyboard"
+        }),
+        MixerChannel(mapping="media_next", midi={
+            44: "keyboard"
+        }),
     ]
 
     tool(channels);

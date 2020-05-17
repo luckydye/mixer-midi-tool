@@ -1,28 +1,54 @@
 from __future__ import print_function
 from ctypes import POINTER, cast
 from comtypes import CLSCTX_ALL
+import comtypes
 from pycaw.pycaw import AudioUtilities, IAudioEndpointVolume
 import re
 import math
+import time
+
+oldMasterTimestamp = 0
+oldMaster = None
 
 def getMasterEndpoint():
-    devices = AudioUtilities.GetSpeakers()
-    interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
-    master = cast(interface, POINTER(IAudioEndpointVolume))
-    return master
+    global oldMasterTimestamp
+    global oldMaster
+
+    now = time.time()
+    
+    if(oldMasterTimestamp + 3 < now):
+        devices = AudioUtilities.GetSpeakers()
+        interface = devices.Activate(IAudioEndpointVolume._iid_, CLSCTX_ALL, None)
+        master = cast(interface, POINTER(IAudioEndpointVolume))
+        oldMaster = master
+        oldMasterTimestamp = now
+
+    return oldMaster
+
+
+oldSessionsTimestamp = 0
+oldSessions = None
 
 def getAudioSessions():
-    return AudioUtilities.GetAllSessions()
+    global oldSessionsTimestamp
+    global oldSessions
+
+    now = time.time()
+
+    if(oldSessionsTimestamp + 3 < now):
+        comtypes.CoInitialize()
+        oldSessions = AudioUtilities.GetAllSessions()
+        oldSessionsTimestamp = now
+
+    return oldSessions
+
 
 class AudioInterface:
-
-    def __init__(self):
-        self.sessions = getAudioSessions()
-
 
     def findProcesses(self, processName):
         sessions = []
 
+        self.sessions = getAudioSessions()
         for session in self.sessions:
             p = re.compile(processName)
 
@@ -37,6 +63,7 @@ class AudioInterface:
     def findProcessesExcept(self, processNames):
         sessions = []
 
+        self.sessions = getAudioSessions()
         for session in self.sessions:
             if session.Process:
                 processName = session.Process.name().lower()

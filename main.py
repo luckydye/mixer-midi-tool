@@ -29,6 +29,12 @@ if __name__ == "__main__":
             34: "solo",
         }),
 
+        MixerChannel(mapping="edge", midi={
+            2: "level",
+            50: "mute",
+            34: "solo",
+        }),
+
         MixerChannel(mapping="spotify", midi={
             3: "level",
             51: "mute",

@@ -1,14 +1,18 @@
-from tool.AudioInterface import AudioInterface
 from pynput.keyboard import Key, Controller
+from tool.interface.AudioInterface import AudioInterface
 
-audio = AudioInterface()
 keyboard = Controller()
+audio = AudioInterface()
 
 class MixerChannel:
 
     title = "Channel"
     
     def __init__(self, midi = {}, mapping = None, exceptions = [], toggle = False):
+        global audio
+
+        audio = AudioInterface()
+
         self.mapping = mapping
         self.exceptions = exceptions
         self.toggle = toggle

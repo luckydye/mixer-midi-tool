@@ -1,0 +1,17 @@
+{
+	"folders": [
+		{
+			"name": "SoundSwitch",
+			"path": "..\\SoundSwitch"
+		},
+		{
+			"name": "pycaw",
+			"path": "..\\pycaw"
+		},
+		{
+			"name": "mixer-midi-tool",
+			"path": "."
+		}
+	],
+	"settings": {}
+}

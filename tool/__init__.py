@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-from tool.MidiInterface import MidiInterface
+from tool.interface.MidiInterface import MidiInterface
 from pystray import Icon as icon, Menu as menu, MenuItem as item
 from PIL import Image
 from tool.Config import Config
